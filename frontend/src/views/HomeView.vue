@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-
 import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+// @ts-ignore
+import { authenUser } from '@/api/backendService'
+
+const router = useRouter()
 
 const schema = z.object({
   user: z
@@ -24,10 +29,28 @@ const state = reactive<Partial<Schema>>({
   password: ''
 })
 
-// const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-  console.log(event.data)
+  // console.log(event.data)
+
+  try {
+    const response = await authenUser({
+      username: event.data.user,
+      password: event.data.password
+    })
+    if (response.code === 200) {
+      sessionStorage.setItem('token', response.message)
+
+      //test show modal success
+      alert('success')
+
+      router.push('/member')
+    } else {
+      alert(response.message)
+    } 
+  } catch (error) {
+    alert('error')
+    console.log(error)
+  }
 }
 </script>
 

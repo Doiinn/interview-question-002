@@ -1,8 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-const userName = ref('xxx')
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+// @ts-ignore
+import { getMember } from '@/api/backendService'
 
-userName.value = "test"
+const router = useRouter()
+
+const userName = ref('')
+
+onMounted(async () => {
+  if (!sessionStorage.getItem('token')) {
+    alert('token expired or no token')
+    router.push('/')
+    return
+  }
+
+  try {
+    // console.log(sessionStorage.getItem('token'))
+    const response = await getMember()
+    if (response.status == 200) {
+      userName.value = response.data
+    } else {
+      router.push('/')
+    }
+  } catch (error) {
+    alert('error')
+    console.log(error)
+  }
+
+});
 
 </script>
 

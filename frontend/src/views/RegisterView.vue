@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-
+import { useRouter } from 'vue-router'
 import { reactive } from 'vue'
+
+// @ts-ignore
+import { registerUser } from '@/api/backendService'
+
+const router = useRouter()
 
 const schema = z.object({
   user: z
@@ -30,17 +35,34 @@ const state = reactive<Partial<Schema>>({
   confirmPassword: '',
 })
 
-// const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-  console.log(event.data)
+  // console.log(event.data)
+
+  try {
+    const response = await registerUser({
+      username: event.data.user,
+      password: event.data.password
+    })
+
+    if (response.code === 201) {
+      //test show modal success
+      alert('success')
+      router.push('/')
+    } else {
+      alert(response.message)
+    }
+  } catch (error) {
+    alert('error')
+    console.log(error)
+  }
 }
 </script>
 
 <template>
   <div class="flex justify-center w-full py-10">
     <UContainer>
-      <UPageHeader title="Register" class="space-y-4" :ui="{ root: 'border-none', container: 'flex flex-col items-center justify-center text-center w-full', title: 'text-center text-primary' }" />
+      <UPageHeader title="Register" class="space-y-4"
+        :ui="{ root: 'border-none', container: 'flex flex-col items-center justify-center text-center w-full', title: 'text-center text-primary' }" />
       <UForm :schema="schema" :state="state" class="mx-auto w-64 max-w-md space-y-4" @submit="onSubmit">
         <UFormField label="User" name="user">
           <UInput class="w-full" v-model="state.user" maxlength="20" />
@@ -62,6 +84,4 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   </div>
 </template>
 
-<style>
-
-</style>
+<style></style>
